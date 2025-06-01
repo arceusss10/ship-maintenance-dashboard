@@ -4,10 +4,6 @@ A modern web application for managing ship maintenance schedules, tracking repai
 
 ## 🚀 Setup and Installation
 
-### Prerequisites
-- Node.js (v14.0.0 or higher)
-- npm (v6.0.0 or higher)
-
 ### Installation Steps
 1. Clone the repository:
 ```bash

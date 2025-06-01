@@ -39,7 +39,7 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
 
     // Load engineers
     const allUsers = JSON.parse(localStorage.getItem('users')) || [];
-    const engineerUsers = allUsers.filter(user => user.role === 'Engineer');
+    const engineerUsers = allUsers.filter(user => user.role === 'Engineer' || user.role === 'Inspector');
     setEngineers(engineerUsers);
 
     if (job) {
@@ -52,26 +52,17 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.type.trim()) {
-      newErrors.type = 'Maintenance type is required';
-    }
     if (!formData.componentId) {
-      newErrors.componentId = 'Component selection is required';
+      newErrors.componentId = 'Component is required';
     }
-    if (!formData.priority) {
-      newErrors.priority = 'Priority is required';
+    if (!formData.assignedEngineerId) {
+      newErrors.assignedEngineerId = 'Engineer assignment is required';
     }
     if (!formData.scheduledDate) {
       newErrors.scheduledDate = 'Scheduled date is required';
     }
     if (!formData.description.trim()) {
       newErrors.description = 'Description is required';
-    }
-    if (!formData.assignedEngineerId) {
-      newErrors.assignedEngineerId = 'Assigned engineer is required';
-    }
-    if (!formData.jobType) {
-      newErrors.jobType = 'Job type is required';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -87,15 +78,13 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
       const updatedJob = {
         ...formData,
         id: job ? job.id : `j${Date.now()}`,
-        componentName: selectedComponent ? selectedComponent.name : '',
-        assignedEngineerName: selectedEngineer ? selectedEngineer.name : ''
+        componentName: selectedComponent?.name || '',
+        assignedEngineerName: selectedEngineer?.name || ''
       };
 
       if (job) {
         // Edit existing job
-        const updatedJobs = jobs.map(j => 
-          j.id === job.id ? updatedJob : j
-        );
+        const updatedJobs = jobs.map(j => j.id === job.id ? updatedJob : j);
         localStorage.setItem('jobs', JSON.stringify(updatedJobs));
       } else {
         // Add new job
@@ -112,7 +101,6 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
       ...prev,
       [name]: value
     }));
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -124,42 +112,10 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-xl font-semibold text-gray-900 mb-6">
-        {job ? 'Edit Maintenance Job' : 'Schedule New Maintenance'}
+        {job ? 'Edit Maintenance Job' : 'Create New Maintenance Job'}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Job Type</label>
-          <select
-            name="jobType"
-            value={formData.jobType}
-            onChange={handleChange}
-            className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-              errors.jobType ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-            }`}
-          >
-            {JOB_TYPES.map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-          {errors.jobType && <p className="mt-1 text-sm text-red-600">{errors.jobType}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Maintenance Type</label>
-          <input
-            type="text"
-            name="type"
-            value={formData.type}
-            onChange={handleChange}
-            placeholder="e.g., Engine Oil Change, Hull Inspection"
-            className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-              errors.type ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-            }`}
-          />
-          {errors.type && <p className="mt-1 text-sm text-red-600">{errors.type}</p>}
-        </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700">Component</label>
           <select
@@ -167,17 +123,31 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
             value={formData.componentId}
             onChange={handleChange}
             className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-              errors.componentId ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+              errors.componentId ? 'border-red-300' : 'border-gray-300'
             }`}
           >
             <option value="">Select a component</option>
             {components.map(component => (
               <option key={component.id} value={component.id}>
-                {component.name} ({component.serialNumber})
+                {component.name} (SN: {component.serialNumber})
               </option>
             ))}
           </select>
           {errors.componentId && <p className="mt-1 text-sm text-red-600">{errors.componentId}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Job Type</label>
+          <select
+            name="jobType"
+            value={formData.jobType}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+          >
+            {JOB_TYPES.map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -187,13 +157,13 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
             value={formData.assignedEngineerId}
             onChange={handleChange}
             className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-              errors.assignedEngineerId ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+              errors.assignedEngineerId ? 'border-red-300' : 'border-gray-300'
             }`}
           >
             <option value="">Select an engineer</option>
             {engineers.map(engineer => (
               <option key={engineer.id} value={engineer.id}>
-                {engineer.name}
+                {engineer.name} ({engineer.specialization})
               </option>
             ))}
           </select>
@@ -206,7 +176,7 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
             name="priority"
             value={formData.priority}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md shadow-sm sm:text-sm border-gray-300 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
           >
             <option value="Low">Low</option>
             <option value="Medium">Medium</option>
@@ -220,7 +190,7 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
             name="status"
             value={formData.status}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md shadow-sm sm:text-sm border-gray-300 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
           >
             <option value="Pending">Pending</option>
             <option value="In Progress">In Progress</option>
@@ -237,7 +207,7 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
             value={formData.scheduledDate}
             onChange={handleChange}
             className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-              errors.scheduledDate ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+              errors.scheduledDate ? 'border-red-300' : 'border-gray-300'
             }`}
           />
           {errors.scheduledDate && <p className="mt-1 text-sm text-red-600">{errors.scheduledDate}</p>}
@@ -250,10 +220,10 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
             value={formData.description}
             onChange={handleChange}
             rows={4}
-            placeholder="Detailed description of the maintenance work..."
             className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-              errors.description ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+              errors.description ? 'border-red-300' : 'border-gray-300'
             }`}
+            placeholder="Enter job description..."
           />
           {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
         </div>
@@ -270,7 +240,7 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
             type="submit"
             className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600"
           >
-            {job ? 'Update Job' : 'Schedule Job'}
+            {job ? 'Update Job' : 'Create Job'}
           </button>
         </div>
       </form>

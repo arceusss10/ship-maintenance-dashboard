@@ -1,25 +1,21 @@
-import { useState, useContext } from "react";
-import { AuthContext } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
 
-const LoginPage = () => {
-  const { login } = useContext(AuthContext);
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const { login } = useContext(AuthContext);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Attempting login with:", email);
     const success = login(email, password);
     if (success) {
-      console.log("Login successful, navigating to dashboard");
-      navigate("/"); // Changed from /dashboard to /
+      navigate('/');
     } else {
-      console.log("Login failed");
-      setError("Invalid credentials");
+      setError('Invalid email or password');
     }
   };
 
@@ -37,20 +33,22 @@ const LoginPage = () => {
             <label className="block text-gray-700 mb-2">Email</label>
             <input
               type="email"
-              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your email"
+              required
             />
           </div>
           <div>
             <label className="block text-gray-700 mb-2">Password</label>
             <input
               type="password"
-              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your password"
+              required
             />
           </div>
           <button
@@ -63,9 +61,9 @@ const LoginPage = () => {
         <div className="mt-4 text-sm text-gray-600">
           <p>Demo Accounts:</p>
           <ul className="list-disc pl-5 mt-2">
-            <li>Admin: admin@shipmanagement.com / admin123</li>
-            <li>Engineer 1: engineer1@shipmanagement.com / engineer123</li>
-            <li>Engineer 2: engineer2@shipmanagement.com / engineer123</li>
+            <li>Admin: admin@entnt.in / admin123</li>
+            <li>Inspector: inspector@entnt.in / inspect123</li>
+            <li>Engineer: engineer@entnt.in / engine123</li>
           </ul>
         </div>
       </div>
@@ -73,4 +71,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default Login; 

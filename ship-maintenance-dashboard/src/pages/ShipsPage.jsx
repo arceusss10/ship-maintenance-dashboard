@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ShipList from '../components/Ships/ShipList';
 import ShipForm from '../components/Ships/ShipForm';
 import ShipDetail from '../components/Ships/ShipDetail';
+import { initializeMockData } from '../utils/localStorageUtils';
 
 const ShipsPage = () => {
   const [selectedShip, setSelectedShip] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isViewMode, setIsViewMode] = useState(false);
+
+  useEffect(() => {
+    // Initialize mock data when the ships page loads
+    initializeMockData();
+  }, []);
 
   const handleAddNew = () => {
     setSelectedShip(null);
@@ -32,8 +38,21 @@ const ShipsPage = () => {
   };
 
   const handleFormSubmit = (shipData) => {
-    // This will be replaced with actual localStorage operations
-    console.log('Ship data:', shipData);
+    const ships = JSON.parse(localStorage.getItem('ships')) || [];
+    const updatedShip = {
+      ...shipData,
+      id: selectedShip ? selectedShip.id : `s${Date.now()}`
+    };
+
+    if (selectedShip) {
+      // Edit existing ship
+      const updatedShips = ships.map(s => s.id === selectedShip.id ? updatedShip : s);
+      localStorage.setItem('ships', JSON.stringify(updatedShips));
+    } else {
+      // Add new ship
+      localStorage.setItem('ships', JSON.stringify([...ships, updatedShip]));
+    }
+
     setIsFormOpen(false);
     setSelectedShip(null);
   };

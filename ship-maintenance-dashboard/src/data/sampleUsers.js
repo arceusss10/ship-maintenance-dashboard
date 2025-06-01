@@ -3,27 +3,29 @@ const sampleUsers = [
   {
     id: 'u1',
     name: 'Admin User',
-    email: 'admin@shipmanagement.com',
+    email: 'admin@entnt.in',
     role: 'Admin',
     password: 'admin123' // In a real app, this would be hashed
   },
   {
     id: 'e1',
-    name: 'Engineer 1',
-    email: 'engineer1@shipmanagement.com',
-    role: 'Engineer',
-    specialization: 'Mechanical Systems',
-    certification: 'Marine Engineer',
-    experience: '10 years'
+    name: 'Inspector',
+    email: 'inspector@entnt.in',
+    role: 'Inspector',
+    specialization: 'Quality Control',
+    certification: 'Marine Inspector',
+    experience: '10 years',
+    password: 'inspect123'
   },
   {
     id: 'e2',
-    name: 'Engineer 2',
-    email: 'engineer2@shipmanagement.com',
+    name: 'Engineer',
+    email: 'engineer@entnt.in',
     role: 'Engineer',
-    specialization: 'Electrical Systems',
+    specialization: 'Marine Systems',
     certification: 'Marine Engineer',
-    experience: '8 years'
+    experience: '8 years',
+    password: 'engine123'
   }
 ];
 

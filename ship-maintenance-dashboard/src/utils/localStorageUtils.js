@@ -1,18 +1,6 @@
 export const initializeMockData = () => {
   console.log("Initializing mock data...");
   
-  // Initialize Users
-  const existingUsers = localStorage.getItem("users");
-  if (!existingUsers) {
-    console.log("Setting up mock users...");
-    const users = [
-      { id: "1", role: "Admin", email: "admin@entnt.in", password: "admin123" },
-      { id: "2", role: "Inspector", email: "inspector@entnt.in", password: "inspect123" },
-      { id: "3", role: "Engineer", email: "engineer@entnt.in", password: "engine123" },
-    ];
-    localStorage.setItem("users", JSON.stringify(users));
-  }
-
   // Initialize Ships
   const existingShips = localStorage.getItem("ships");
   if (!existingShips) {
@@ -54,35 +42,33 @@ export const initializeMockData = () => {
   if (!existingJobs) {
     console.log("Setting up mock jobs...");
     const jobs = [
-      { 
-        id: "j1", 
-        componentId: "c1", 
-        shipId: "s1", 
-        type: "Inspection", 
-        priority: "High",
-        status: "Open", 
-        assignedEngineerId: "3", 
-        scheduledDate: "2025-05-05" 
-      },
-      { 
-        id: "j2", 
-        componentId: "c2", 
-        shipId: "s2", 
-        type: "Maintenance", 
+      {
+        id: "j1",
+        shipId: "s1",
+        componentId: "c1",
+        componentName: "Main Engine",
+        type: "Routine Check",
+        jobType: "Preventive Maintenance",
         priority: "Medium",
-        status: "In Progress", 
-        assignedEngineerId: "3", 
-        scheduledDate: "2024-04-15" 
+        status: "Pending",
+        scheduledDate: "2024-04-01",
+        description: "Regular maintenance check of main engine",
+        assignedEngineerId: "e1",
+        assignedEngineerName: "Engineer 1"
       },
       {
-        id: "j3",
-        componentId: "c1",
-        shipId: "s1",
+        id: "j2",
+        shipId: "s2",
+        componentId: "c2",
+        componentName: "Radar",
         type: "Repair",
-        priority: "Low",
-        status: "Completed",
-        assignedEngineerId: "3",
-        scheduledDate: "2024-03-01"
+        jobType: "Corrective Maintenance",
+        priority: "High",
+        status: "In Progress",
+        scheduledDate: "2024-03-25",
+        description: "Fix radar signal interference issue",
+        assignedEngineerId: "e2",
+        assignedEngineerName: "Engineer 2"
       }
     ];
     localStorage.setItem("jobs", JSON.stringify(jobs));
@@ -111,7 +97,7 @@ export const calculateDashboardStats = () => {
     }).length;
 
     // Count jobs by status
-    const jobsInProgress = jobs.filter(job => job.status === 'Open' || job.status === 'In Progress').length;
+    const jobsInProgress = jobs.filter(job => job.status === 'In Progress').length;
     const jobsCompleted = jobs.filter(job => job.status === 'Completed').length;
 
     return {

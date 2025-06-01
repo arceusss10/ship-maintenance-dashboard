@@ -7,7 +7,7 @@ A modern web application for managing ship maintenance schedules, tracking repai
 ### Installation Steps
 1. Clone the repository:
 ```bash
-git clone [repository-url]
+git clone [https://github.com/arceusss10/ship-maintenance-dashboard]
 cd ship-maintenance-dashboard
 ```
 

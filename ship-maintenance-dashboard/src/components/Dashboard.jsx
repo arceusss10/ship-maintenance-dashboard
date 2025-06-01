@@ -74,8 +74,8 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const KPICard = ({ title, value, description, color, icon }) => (
-    <div className={`bg-white rounded-lg shadow-md p-6 border-l-4 ${color}`}>
+  const KPICard = ({ title, value, description, icon }) => (
+    <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
       <div className="flex items-center">
         <div className="text-2xl mr-4">{icon}</div>
         <div>
@@ -287,26 +287,22 @@ const Dashboard = () => {
         <KPICard
           title="Total Ships"
           value={stats.totalShips}
-          color="border-blue-500"
           icon="🚢"
         />
         <KPICard
           title="Overdue Components"
           value={stats.overdueComponents}
-          color="border-red-500"
           icon="⚠️"
           description="Components needing maintenance"
         />
         <KPICard
           title="Jobs in Progress"
           value={stats.jobsInProgress}
-          color="border-yellow-500"
           icon="🔧"
         />
         <KPICard
           title="Completed Jobs"
           value={stats.jobsCompleted}
-          color="border-green-500"
           icon="✅"
         />
       </div>

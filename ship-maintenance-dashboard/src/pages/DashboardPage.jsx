@@ -63,8 +63,8 @@ const DashboardPage = () => {
   }
 
   // KPI Card Component
-  const KPICard = ({ title, value, color, icon }) => (
-    <div className={`bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 ${color}`}>
+  const KPICard = ({ title, value }) => (
+    <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
@@ -87,22 +87,18 @@ const DashboardPage = () => {
           <KPICard
             title="Total Ships"
             value={stats.totalShips}
-            color="border-l-4 border-blue-500"
           />
           <KPICard
             title="Overdue Components"
             value={stats.overdueComponents}
-            color="border-l-4 border-red-500"
           />
           <KPICard
             title="Jobs in Progress"
             value={stats.jobsInProgress}
-            color="border-l-4 border-yellow-500"
           />
           <KPICard
             title="Completed Jobs"
             value={stats.jobsCompleted}
-            color="border-l-4 border-green-500"
           />
         </div>
 

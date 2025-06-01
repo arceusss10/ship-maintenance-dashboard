@@ -7,6 +7,7 @@ import ShipDetail from './components/Ships/ShipDetail';
 import Login from './components/Auth/Login';
 import PrivateRoute from './components/Auth/PrivateRoute';
 import { initializeSampleUsers } from './data/sampleUsers';
+import CalendarPage from './pages/CalendarPage';
 
 function App() {
   useEffect(() => {
@@ -42,6 +43,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <ShipDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <PrivateRoute>
+                  <CalendarPage />
                 </PrivateRoute>
               }
             />

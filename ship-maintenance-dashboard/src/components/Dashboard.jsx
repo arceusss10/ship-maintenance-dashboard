@@ -89,6 +89,80 @@ const Dashboard = () => {
     </div>
   );
 
+  const PriorityChart = ({ data }) => {
+    const total = Object.values(data).reduce((sum, value) => sum + value, 0);
+    const getPercentage = (value) => ((value / total) * 100).toFixed(1);
+    
+    const priorityColors = {
+      High: 'bg-red-500',
+      Medium: 'bg-yellow-500',
+      Low: 'bg-green-500'
+    };
+
+    const priorityTextColors = {
+      High: 'text-red-700',
+      Medium: 'text-yellow-700',
+      Low: 'text-green-700'
+    };
+
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Jobs by Priority</h3>
+        <div className="space-y-6">
+          {Object.entries(data).map(([priority, value]) => {
+            const percentage = getPercentage(value);
+            return (
+              <div key={priority} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <div className={`w-3 h-3 rounded-full ${priorityColors[priority]} mr-2`}></div>
+                    <span className={`font-medium ${priorityTextColors[priority]}`}>
+                      {priority} Priority
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm">
+                    <span className="font-semibold">{value} jobs</span>
+                    <span className="text-gray-500">({percentage}%)</span>
+                  </div>
+                </div>
+                <div className="relative w-full h-4 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className={`absolute left-0 top-0 h-full ${priorityColors[priority]} transition-all duration-500 ease-in-out`}
+                    style={{ width: `${percentage}%` }}
+                  >
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Summary Section */}
+        <div className="mt-6 pt-4 border-t border-gray-200">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Total Jobs</span>
+            <span className="font-semibold">{total}</span>
+          </div>
+          <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
+            {Object.entries(data).map(([priority, value]) => (
+              <div
+                key={priority}
+                className={`p-2 rounded ${priorityColors[priority]} bg-opacity-10 text-center`}
+              >
+                <div className={`font-medium ${priorityTextColors[priority]}`}>
+                  {priority}
+                </div>
+                <div className={priorityTextColors[priority]}>
+                  {getPercentage(value)}%
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const BarChart = ({ data, title }) => (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
@@ -148,9 +222,8 @@ const Dashboard = () => {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <BarChart
+        <PriorityChart
           data={stats.jobsByPriority}
-          title="Jobs by Priority"
         />
         <BarChart
           data={stats.componentsByStatus}
@@ -158,7 +231,7 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Recent Activity */}
+      {/* System Status */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">System Status</h3>
         <div className="space-y-4">

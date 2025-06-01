@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import NotificationCenter from './Notifications/NotificationCenter';
 
 const Navbar = () => {
   const { currentUser, logout } = useContext(AuthContext);
@@ -55,8 +56,9 @@ const Navbar = () => {
               </Link>
             </div>
           </div>
-          <div className="flex items-center">
-            <span className="text-sm text-gray-500 mr-4">
+          <div className="flex items-center space-x-4">
+            <NotificationCenter />
+            <span className="text-sm text-gray-500">
               {currentUser.email} ({currentUser.role})
             </span>
             <button

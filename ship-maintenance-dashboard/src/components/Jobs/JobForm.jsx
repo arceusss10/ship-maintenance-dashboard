@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNotifications } from '../../contexts/NotificationContext';
 
 const JOB_TYPES = [
   'Routine Inspection',
@@ -14,6 +15,7 @@ const JOB_TYPES = [
 ];
 
 const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
+  const { addNotification } = useNotifications();
   const [components, setComponents] = useState([]);
   const [engineers, setEngineers] = useState([]);
   const [formData, setFormData] = useState({
@@ -86,9 +88,45 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
         // Edit existing job
         const updatedJobs = jobs.map(j => j.id === job.id ? updatedJob : j);
         localStorage.setItem('jobs', JSON.stringify(updatedJobs));
+
+        // Add notification for job update
+        addNotification({
+          type: 'job_updated',
+          title: 'Job Updated',
+          message: `Maintenance job for ${updatedJob.componentName} has been updated.`
+        });
+
+        // Add notification for job completion if status changed to completed
+        if (updatedJob.status === 'Completed' && job.status !== 'Completed') {
+          addNotification({
+            type: 'job_completed',
+            title: 'Job Completed',
+            message: `Maintenance job for ${updatedJob.componentName} has been marked as completed.`
+          });
+        }
       } else {
         // Add new job
         localStorage.setItem('jobs', JSON.stringify([...jobs, updatedJob]));
+        
+        // Add notification for new job
+        addNotification({
+          type: 'job_created',
+          title: 'New Job Created',
+          message: `New maintenance job created for ${updatedJob.componentName}.`
+        });
+
+        // Add notification for upcoming maintenance if scheduled within 7 days
+        const scheduledDate = new Date(updatedJob.scheduledDate);
+        const today = new Date();
+        const daysUntilMaintenance = Math.ceil((scheduledDate - today) / (1000 * 60 * 60 * 24));
+        
+        if (daysUntilMaintenance <= 7 && daysUntilMaintenance > 0) {
+          addNotification({
+            type: 'maintenance_due',
+            title: 'Upcoming Maintenance',
+            message: `Maintenance for ${updatedJob.componentName} is scheduled in ${daysUntilMaintenance} days.`
+          });
+        }
       }
 
       onSubmit(updatedJob);

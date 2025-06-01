@@ -163,29 +163,120 @@ const Dashboard = () => {
     );
   };
 
-  const BarChart = ({ data, title }) => (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
-      <div className="space-y-4">
-        {Object.entries(data).map(([label, value]) => (
-          <div key={label}>
-            <div className="flex justify-between text-sm text-gray-600 mb-1">
-              <span>{label}</span>
-              <span>{value}</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div
-                className="bg-blue-600 h-2.5 rounded-full"
-                style={{
-                  width: `${(value / Math.max(...Object.values(data))) * 100}%`
-                }}
-              ></div>
+  const ComponentStatusChart = ({ data }) => {
+    const total = Object.values(data).reduce((sum, value) => sum + value, 0);
+    const getPercentage = (value) => ((value / total) * 100).toFixed(1);
+
+    const statusConfig = {
+      'Active': {
+        color: 'bg-emerald-500',
+        textColor: 'text-emerald-700',
+        description: 'Functioning normally'
+      },
+      'Under Maintenance': {
+        color: 'bg-blue-500',
+        textColor: 'text-blue-700',
+        description: 'Currently being serviced'
+      },
+      'Needs Attention': {
+        color: 'bg-red-500',
+        textColor: 'text-red-700',
+        description: 'Requires immediate maintenance'
+      }
+    };
+
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-lg font-semibold text-gray-800">Component Status Distribution</h3>
+          <div className="text-sm text-gray-500">
+            Total: {total} components
+          </div>
+        </div>
+
+        <div className="space-y-8">
+          {Object.entries(data).map(([status, count]) => {
+            const percentage = getPercentage(count);
+            const config = statusConfig[status];
+            
+            return (
+              <div key={status} className="relative">
+                <div className="flex justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <div>
+                      <div className={`font-medium ${config.textColor}`}>
+                        {status}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {config.description}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-semibold">{count}</div>
+                    <div className="text-sm text-gray-500">{percentage}%</div>
+                  </div>
+                </div>
+
+                {/* Progress bar with gradient */}
+                <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${config.color} rounded-full transition-all duration-500`}
+                    style={{ 
+                      width: `${percentage}%`,
+                      background: `linear-gradient(90deg, ${config.color}88 0%, ${config.color} 100%)`
+                    }}
+                  />
+                </div>
+
+                {/* Mini stats below progress bar */}
+                <div className="mt-1 flex justify-between text-xs text-gray-400">
+                  <div>0%</div>
+                  <div>50%</div>
+                  <div>100%</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Visual distribution circle */}
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="flex justify-center">
+            <div className="relative w-32 h-32">
+              {Object.entries(data).map(([status, count], index, arr) => {
+                const percentage = getPercentage(count);
+                const config = statusConfig[status];
+                let rotation = 0;
+                
+                // Calculate rotation based on previous segments
+                for (let i = 0; i < index; i++) {
+                  rotation += (Number(getPercentage(arr[i][1])) * 3.6); // Convert percentage to degrees
+                }
+
+                return (
+                  <div
+                    key={status}
+                    className={`absolute w-full h-full ${config.color} rounded-full`}
+                    style={{
+                      clipPath: `conic-gradient(from ${rotation}deg, currentColor ${percentage * 3.6}deg, transparent ${percentage * 3.6}deg)`,
+                      opacity: 0.8
+                    }}
+                  />
+                );
+              })}
+              <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-sm font-medium">{total}</div>
+                  <div className="text-xs text-gray-500">Total</div>
+                </div>
+              </div>
             </div>
           </div>
-        ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -225,9 +316,8 @@ const Dashboard = () => {
         <PriorityChart
           data={stats.jobsByPriority}
         />
-        <BarChart
+        <ComponentStatusChart
           data={stats.componentsByStatus}
-          title="Component Status Distribution"
         />
       </div>
 

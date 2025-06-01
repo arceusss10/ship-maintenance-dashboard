@@ -1,92 +1,181 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
-import { calculateDashboardStats } from '../utils/localStorageUtils';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
     totalShips: 0,
     overdueComponents: 0,
     jobsInProgress: 0,
-    jobsCompleted: 0
+    jobsCompleted: 0,
+    jobsByPriority: {
+      High: 0,
+      Medium: 0,
+      Low: 0
+    },
+    jobsByType: {},
+    componentsByStatus: {
+      Active: 0,
+      'Under Maintenance': 0,
+      'Needs Attention': 0
+    }
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   const { currentUser } = useContext(AuthContext);
 
   useEffect(() => {
-    const loadStats = () => {
-      try {
-        const calculatedStats = calculateDashboardStats();
-        setStats(calculatedStats);
-        setError(null);
-      } catch (err) {
-        console.error("Error loading stats:", err);
-        setError("Failed to load dashboard statistics");
-      } finally {
-        setLoading(false);
-      }
+    const calculateStats = () => {
+      const ships = JSON.parse(localStorage.getItem('ships')) || [];
+      const components = JSON.parse(localStorage.getItem('components')) || [];
+      const jobs = JSON.parse(localStorage.getItem('jobs')) || [];
+
+      // Calculate jobs by priority
+      const jobsByPriority = jobs.reduce((acc, job) => {
+        acc[job.priority] = (acc[job.priority] || 0) + 1;
+        return acc;
+      }, { High: 0, Medium: 0, Low: 0 });
+
+      // Calculate jobs by type
+      const jobsByType = jobs.reduce((acc, job) => {
+        acc[job.jobType] = (acc[job.jobType] || 0) + 1;
+        return acc;
+      }, {});
+
+      // Calculate components by status
+      const componentsByStatus = components.reduce((acc, comp) => {
+        const lastMaintenance = new Date(comp.lastMaintenanceDate);
+        const monthsSinceLastMaintenance = (new Date() - lastMaintenance) / (1000 * 60 * 60 * 24 * 30);
+        
+        if (monthsSinceLastMaintenance > 6) {
+          acc['Needs Attention']++;
+        } else if (jobs.some(job => job.componentId === comp.id && job.status === 'In Progress')) {
+          acc['Under Maintenance']++;
+        } else {
+          acc['Active']++;
+        }
+        return acc;
+      }, { Active: 0, 'Under Maintenance': 0, 'Needs Attention': 0 });
+
+      setStats({
+        totalShips: ships.length,
+        overdueComponents: components.filter(comp => {
+          const lastMaintenance = new Date(comp.lastMaintenanceDate);
+          return (new Date() - lastMaintenance) / (1000 * 60 * 60 * 24 * 30) > 6;
+        }).length,
+        jobsInProgress: jobs.filter(job => job.status === 'In Progress').length,
+        jobsCompleted: jobs.filter(job => job.status === 'Completed').length,
+        jobsByPriority,
+        jobsByType,
+        componentsByStatus
+      });
     };
 
-    loadStats();
-    const interval = setInterval(loadStats, 5000); // Refresh every 5 seconds
+    calculateStats();
+    const interval = setInterval(calculateStats, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 p-6 flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading dashboard...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-100 p-6">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error}
+  const KPICard = ({ title, value, description, color, icon }) => (
+    <div className={`bg-white rounded-lg shadow-md p-6 border-l-4 ${color}`}>
+      <div className="flex items-center">
+        <div className="text-2xl mr-4">{icon}</div>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+          <p className="text-3xl font-bold mt-2">{value}</p>
+          {description && (
+            <p className="text-sm text-gray-600 mt-1">{description}</p>
+          )}
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 
-  const StatCard = ({ title, value, color }) => (
-    <div className={`bg-white rounded-lg shadow-md p-6 ${color}`}>
-      <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-      <p className="text-3xl font-bold mt-2">{value}</p>
+  const BarChart = ({ data, title }) => (
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
+      <div className="space-y-4">
+        {Object.entries(data).map(([label, value]) => (
+          <div key={label}>
+            <div className="flex justify-between text-sm text-gray-600 mb-1">
+              <span>{label}</span>
+              <span>{value}</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div
+                className="bg-blue-600 h-2.5 rounded-full"
+                style={{
+                  width: `${(value / Math.max(...Object.values(data))) * 100}%`
+                }}
+              ></div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-2 text-gray-600">Welcome, {currentUser.name}!</p>
-        </div>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+      
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <KPICard
+          title="Total Ships"
+          value={stats.totalShips}
+          color="border-blue-500"
+          icon="🚢"
+        />
+        <KPICard
+          title="Overdue Components"
+          value={stats.overdueComponents}
+          color="border-red-500"
+          icon="⚠️"
+          description="Components needing maintenance"
+        />
+        <KPICard
+          title="Jobs in Progress"
+          value={stats.jobsInProgress}
+          color="border-yellow-500"
+          icon="🔧"
+        />
+        <KPICard
+          title="Completed Jobs"
+          value={stats.jobsCompleted}
+          color="border-green-500"
+          icon="✅"
+        />
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard
-            title="Total Ships"
-            value={stats.totalShips}
-            color="border-l-4 border-blue-500"
-          />
-          <StatCard
-            title="Overdue Components"
-            value={stats.overdueComponents}
-            color="border-l-4 border-red-500"
-          />
-          <StatCard
-            title="Jobs in Progress"
-            value={stats.jobsInProgress}
-            color="border-l-4 border-yellow-500"
-          />
-          <StatCard
-            title="Completed Jobs"
-            value={stats.jobsCompleted}
-            color="border-l-4 border-green-500"
-          />
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <BarChart
+          data={stats.jobsByPriority}
+          title="Jobs by Priority"
+        />
+        <BarChart
+          data={stats.componentsByStatus}
+          title="Component Status Distribution"
+        />
+      </div>
+
+      {/* Recent Activity */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">System Status</h3>
+        <div className="space-y-4">
+          <div className="flex items-center text-sm text-gray-600">
+            <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+            <span>All systems operational</span>
+          </div>
+          <div className="flex items-center text-sm text-gray-600">
+            <span className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></span>
+            <span>{stats.jobsInProgress} maintenance tasks in progress</span>
+          </div>
+          {stats.overdueComponents > 0 && (
+            <div className="flex items-center text-sm text-red-600">
+              <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+              <span>{stats.overdueComponents} components require immediate attention</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

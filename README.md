@@ -2,7 +2,7 @@
 
 A modern web application for managing ship maintenance schedules, tracking repairs, and monitoring fleet status. Built with React and Tailwind CSS, this dashboard provides an intuitive interface for ship maintenance management.
 
-## 🚀 Setup and Installation
+## Setup and Installation
 
 ### Installation Steps
 1. Clone the repository:
@@ -32,7 +32,7 @@ The application includes three demo accounts with different roles:
 - Inspector: inspector@entnt.in / inspect123
 - Engineer: engineer@entnt.in / engine123
 
-## 🏗️ Application Architecture
+## Application Architecture
 
 ### Frontend Architecture
 - **React**: Core framework for building the user interface
@@ -66,7 +66,7 @@ The application includes three demo accounts with different roles:
    - Priority-based notification handling
    - Read/unread status management
 
-## ⚠️ Known Issues and Limitations
+## Known Issues and Limitations
 
 1. **Authentication**
    - Currently using mock authentication (demo purposes)
@@ -82,7 +82,7 @@ The application includes three demo accounts with different roles:
    - Optimized for modern browsers
    - Limited testing on older browser versions
 
-## 🛠️ Technical Decisions
+## Technical Decisions
 
 ### 1. Framework Selection
 - **React**: Chosen for its robust ecosystem, component reusability, and strong community support

@@ -132,4 +132,5 @@ const ShipDetail = ({ ship }) => {
   );
 };
 
+
 export default ShipDetail; 

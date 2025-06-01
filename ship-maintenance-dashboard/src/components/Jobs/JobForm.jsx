@@ -1,7 +1,21 @@
 import React, { useState, useEffect } from 'react';
 
+const JOB_TYPES = [
+  'Routine Inspection',
+  'Preventive Maintenance',
+  'Corrective Maintenance',
+  'Emergency Repair',
+  'System Upgrade',
+  'Component Replacement',
+  'Safety Check',
+  'Performance Testing',
+  'Calibration',
+  'Other'
+];
+
 const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
   const [components, setComponents] = useState([]);
+  const [engineers, setEngineers] = useState([]);
   const [formData, setFormData] = useState({
     type: '',
     componentId: '',
@@ -10,6 +24,9 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
     status: 'Pending',
     scheduledDate: '',
     description: '',
+    assignedEngineerId: '',
+    assignedEngineerName: '',
+    jobType: JOB_TYPES[0],
     shipId: shipId
   });
   const [errors, setErrors] = useState({});
@@ -19,6 +36,11 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
     const allComponents = JSON.parse(localStorage.getItem('components')) || [];
     const shipComponents = allComponents.filter(comp => comp.shipId === shipId);
     setComponents(shipComponents);
+
+    // Load engineers
+    const allUsers = JSON.parse(localStorage.getItem('users')) || [];
+    const engineerUsers = allUsers.filter(user => user.role === 'Engineer');
+    setEngineers(engineerUsers);
 
     if (job) {
       setFormData({
@@ -45,6 +67,12 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
     if (!formData.description.trim()) {
       newErrors.description = 'Description is required';
     }
+    if (!formData.assignedEngineerId) {
+      newErrors.assignedEngineerId = 'Assigned engineer is required';
+    }
+    if (!formData.jobType) {
+      newErrors.jobType = 'Job type is required';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -54,10 +82,13 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
     if (validateForm()) {
       const jobs = JSON.parse(localStorage.getItem('jobs')) || [];
       const selectedComponent = components.find(c => c.id === formData.componentId);
+      const selectedEngineer = engineers.find(e => e.id === formData.assignedEngineerId);
+      
       const updatedJob = {
         ...formData,
         id: job ? job.id : `j${Date.now()}`,
-        componentName: selectedComponent ? selectedComponent.name : ''
+        componentName: selectedComponent ? selectedComponent.name : '',
+        assignedEngineerName: selectedEngineer ? selectedEngineer.name : ''
       };
 
       if (job) {
@@ -98,13 +129,30 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
+          <label className="block text-sm font-medium text-gray-700">Job Type</label>
+          <select
+            name="jobType"
+            value={formData.jobType}
+            onChange={handleChange}
+            className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+              errors.jobType ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+            }`}
+          >
+            {JOB_TYPES.map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+          {errors.jobType && <p className="mt-1 text-sm text-red-600">{errors.jobType}</p>}
+        </div>
+
+        <div>
           <label className="block text-sm font-medium text-gray-700">Maintenance Type</label>
           <input
             type="text"
             name="type"
             value={formData.type}
             onChange={handleChange}
-            placeholder="e.g., Routine Check, Repair, Replacement"
+            placeholder="e.g., Engine Oil Change, Hull Inspection"
             className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
               errors.type ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
             }`}
@@ -130,6 +178,26 @@ const JobForm = ({ job, shipId, onSubmit, onCancel }) => {
             ))}
           </select>
           {errors.componentId && <p className="mt-1 text-sm text-red-600">{errors.componentId}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Assigned Engineer</label>
+          <select
+            name="assignedEngineerId"
+            value={formData.assignedEngineerId}
+            onChange={handleChange}
+            className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+              errors.assignedEngineerId ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+            }`}
+          >
+            <option value="">Select an engineer</option>
+            {engineers.map(engineer => (
+              <option key={engineer.id} value={engineer.id}>
+                {engineer.name}
+              </option>
+            ))}
+          </select>
+          {errors.assignedEngineerId && <p className="mt-1 text-sm text-red-600">{errors.assignedEngineerId}</p>}
         </div>
 
         <div>

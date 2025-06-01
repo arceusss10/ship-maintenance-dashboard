@@ -172,78 +172,15 @@ const MaintenanceCalendar = () => {
     setSelectedDate(newDate);
   };
 
-  const JobDetailsModal = () => {
-    if (!selectedDayJobs) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold">
-              Jobs for {selectedDayJobs.date}
-            </h3>
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              ✕
-            </button>
-          </div>
-          {selectedDayJobs.jobs.length === 0 ? (
-            <p className="text-gray-500">No jobs scheduled for this day.</p>
-          ) : (
-            <div className="space-y-4">
-              {selectedDayJobs.jobs.map((job) => (
-                <div
-                  key={job.id}
-                  className={`p-4 rounded-lg ${
-                    job.priority === 'High'
-                      ? 'bg-red-50'
-                      : job.priority === 'Medium'
-                      ? 'bg-yellow-50'
-                      : 'bg-green-50'
-                  }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-semibold">{job.componentName}</h4>
-                      <p className="text-sm text-gray-600 mt-1">{job.description}</p>
-                    </div>
-                    <span
-                      className={`px-2 py-1 rounded text-sm ${
-                        job.priority === 'High'
-                          ? 'bg-red-100 text-red-800'
-                          : job.priority === 'Medium'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-green-100 text-green-800'
-                      }`}
-                    >
-                      {job.priority}
-                    </span>
-                  </div>
-                  <div className="mt-2 text-sm text-gray-500">
-                    <p>Type: {job.jobType}</p>
-                    <p>Status: {job.status}</p>
-                    <p>Engineer: {job.assignedEngineerName}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
         <h2 className="text-2xl font-bold text-gray-900">Maintenance Calendar</h2>
-        <div className="flex items-center space-x-4">
-          <div className="flex rounded-md shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+          <div className="flex rounded-md shadow-sm w-full sm:w-auto">
             <button
               onClick={() => setViewType('month')}
-              className={`px-4 py-2 text-sm font-medium rounded-l-md ${
+              className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-l-md ${
                 viewType === 'month'
                   ? 'bg-blue-500 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -253,7 +190,7 @@ const MaintenanceCalendar = () => {
             </button>
             <button
               onClick={() => setViewType('week')}
-              className={`px-4 py-2 text-sm font-medium rounded-r-md ${
+              className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-r-md ${
                 viewType === 'week'
                   ? 'bg-blue-500 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -262,14 +199,14 @@ const MaintenanceCalendar = () => {
               Week
             </button>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto space-x-4">
             <button
               onClick={() => navigateMonth(-1)}
               className="p-2 hover:bg-gray-100 rounded"
             >
               ←
             </button>
-            <span className="text-lg font-semibold">
+            <span className="text-lg font-semibold whitespace-nowrap">
               {monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}
             </span>
             <button
@@ -282,10 +219,14 @@ const MaintenanceCalendar = () => {
         </div>
       </div>
 
-      {viewType === 'month' ? renderMonthView() : renderWeekView()}
+      <div className="overflow-x-auto -mx-6">
+        <div className="inline-block min-w-full align-middle px-6">
+          {viewType === 'month' ? renderMonthView() : renderWeekView()}
+        </div>
+      </div>
 
       <div className="mt-4 text-sm text-gray-600">
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-wrap gap-4">
           <div className="flex items-center">
             <div className="w-3 h-3 bg-red-100 rounded mr-1"></div>
             <span>High Priority</span>
@@ -301,7 +242,63 @@ const MaintenanceCalendar = () => {
         </div>
       </div>
 
-      {isModalOpen && <JobDetailsModal />}
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-auto max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">
+                Jobs for {selectedDayJobs.date}
+              </h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            {selectedDayJobs.jobs.length === 0 ? (
+              <p className="text-gray-500">No jobs scheduled for this day.</p>
+            ) : (
+              <div className="space-y-4">
+                {selectedDayJobs.jobs.map((job) => (
+                  <div
+                    key={job.id}
+                    className={`p-4 rounded-lg ${
+                      job.priority === 'High'
+                        ? 'bg-red-50'
+                        : job.priority === 'Medium'
+                        ? 'bg-yellow-50'
+                        : 'bg-green-50'
+                    }`}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+                      <h4 className="font-medium">{job.componentName}</h4>
+                      <div className="flex items-center mt-2 sm:mt-0">
+                        <span
+                          className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                            job.priority === 'High'
+                              ? 'bg-red-100 text-red-800'
+                              : job.priority === 'Medium'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-green-100 text-green-800'
+                          }`}
+                        >
+                          {job.priority} Priority
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600">{job.description}</p>
+                    <div className="mt-2 text-sm text-gray-500">
+                      Assigned to: {job.assignedTo}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

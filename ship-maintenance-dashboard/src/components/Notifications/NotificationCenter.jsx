@@ -83,7 +83,7 @@ const NotificationCenter = () => {
 
       {/* Notification Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl z-50">
+        <div className="absolute right-0 mt-2 w-screen sm:w-96 bg-white rounded-lg shadow-xl z-50 max-h-[90vh] sm:max-h-[80vh] overflow-hidden">
           <div className="p-4 border-b border-gray-200">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
@@ -104,7 +104,7 @@ const NotificationCenter = () => {
             </div>
           </div>
 
-          <div className="max-h-96 overflow-y-auto">
+          <div className="overflow-y-auto" style={{ maxHeight: 'calc(90vh - 4rem)' }}>
             {notifications.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
                 No notifications
@@ -136,17 +136,9 @@ const NotificationCenter = () => {
                       <p className="mt-1 text-sm text-gray-600">
                         {notification.message}
                       </p>
-                      <div className="mt-2 text-xs text-gray-500 flex justify-between items-center">
-                        <span>{formatTimestamp(notification.timestamp)}</span>
-                        {!notification.isRead && (
-                          <button
-                            onClick={() => markAsRead(notification.id)}
-                            className="text-blue-600 hover:text-blue-800"
-                          >
-                            Mark as read
-                          </button>
-                        )}
-                      </div>
+                      <p className="mt-1 text-xs text-gray-500">
+                        {new Date(notification.timestamp).toLocaleString()}
+                      </p>
                     </div>
                   </div>
                 </div>

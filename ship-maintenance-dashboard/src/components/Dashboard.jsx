@@ -283,7 +283,7 @@ const Dashboard = () => {
       <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
       
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <KPICard
           title="Total Ships"
           value={stats.totalShips}
@@ -312,17 +312,21 @@ const Dashboard = () => {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <PriorityChart
-          data={stats.jobsByPriority}
-        />
-        <ComponentStatusChart
-          data={stats.componentsByStatus}
-        />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+          <PriorityChart
+            data={stats.jobsByPriority}
+          />
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+          <ComponentStatusChart
+            data={stats.componentsByStatus}
+          />
+        </div>
       </div>
 
       {/* System Status */}
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">System Status</h3>
         <div className="space-y-4">
           <div className="flex items-center text-sm text-gray-600">
